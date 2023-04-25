@@ -1,4 +1,4 @@
-- 資料夾結構如下：  
+- 模仿Kaggle的資料夾結構，如下：  
 ```
 ├── requirements.txt
 ├── input
@@ -8,3 +8,4 @@
     ├── main.ipynb
     └── The_General.ipynb
 ```
+- 運行的時候，請將工作目錄位置設在working
