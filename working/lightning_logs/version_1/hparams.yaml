@@ -1,0 +1,9 @@
+batch_size: 16
+folder_name: ../input/petfinder-pawpularity-score
+imagesize: 384
+lr: 0.0001
+model_name: swin_large_patch4_window12_384
+num_epoches: 5
+num_workers: 8
+seed: 1212
+valid_ratio: 0.2
