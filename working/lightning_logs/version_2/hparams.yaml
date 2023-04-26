@@ -1,0 +1,90 @@
+epoch: 20
+exp_name: exp049
+loss: nn.BCEWithLogitsLoss
+model: !!python/object/new:box.box.Box
+  dictitems:
+    name: swin_large_patch4_window12_384
+    output_dim: 1
+  state:
+    _box_config:
+      __created: true
+      __safe_keys:
+        name: name
+        output_dim: output_dim
+      box_class: &id001 !!python/name:box.box.Box ''
+      box_dots: false
+      box_duplicates: ignore
+      box_intact_types: !!python/tuple []
+      box_namespace: !!python/tuple
+      - model
+      box_recast: null
+      box_safe_prefix: x
+      camel_killer_box: false
+      conversion_box: true
+      default_box: false
+      default_box_attr: *id001
+      default_box_create_on_get: true
+      default_box_none_transform: true
+      frozen_box: false
+      modify_tuples_box: false
+n_splits: 5
+root: ../input/petfinder-pawpularity-score/
+seed: 2021
+test_loader: !!python/object/new:box.box.Box
+  dictitems:
+    batch_size: 16
+    drop_last: false
+    num_workers: 16
+    pin_memory: false
+    shuffle: false
+  state:
+    _box_config:
+      __created: true
+      __safe_keys:
+        batch_size: batch_size
+        drop_last: drop_last
+        num_workers: num_workers
+        pin_memory: pin_memory
+        shuffle: shuffle
+      box_class: *id001
+      box_dots: false
+      box_duplicates: ignore
+      box_intact_types: !!python/tuple []
+      box_namespace: !!python/tuple
+      - test_loader
+      box_recast: null
+      box_safe_prefix: x
+      camel_killer_box: false
+      conversion_box: true
+      default_box: false
+      default_box_attr: *id001
+      default_box_create_on_get: true
+      default_box_none_transform: true
+      frozen_box: false
+      modify_tuples_box: false
+transform: !!python/object/new:box.box.Box
+  dictitems:
+    image_size: 384
+    name: get_default_transforms
+  state:
+    _box_config:
+      __created: true
+      __safe_keys:
+        image_size: image_size
+        name: name
+      box_class: *id001
+      box_dots: false
+      box_duplicates: ignore
+      box_intact_types: !!python/tuple []
+      box_namespace: !!python/tuple
+      - transform
+      box_recast: null
+      box_safe_prefix: x
+      camel_killer_box: false
+      conversion_box: true
+      default_box: false
+      default_box_attr: *id001
+      default_box_create_on_get: true
+      default_box_none_transform: true
+      frozen_box: false
+      modify_tuples_box: false
