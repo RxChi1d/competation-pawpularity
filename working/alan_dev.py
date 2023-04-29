@@ -5,25 +5,26 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, train_test_split
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 from torchvision.models import resnet50
 from torchvision.models import ResNet50_Weights
 from torch.nn.functional import mse_loss
-from torchvision.transforms import Compose, Normalize, Resize, ToTensor
+from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, RandomVerticalFlip, Resize, ToTensor
 from tqdm import tqdm
 
 
 class args():
     def __init__(self):
         self.DEVICE = "cuda"
-        self.EPOCHS = 10
+        self.EPOCHS = 20
         self.GAMMA = 0.1
+        self.KFOLD = 3
         self.LEARNING_RATE = 1e-4
         self.SEED = 42
-        self.STEPS = 5
-        self.TRAINING_BATCH_SIZE = 8
+        self.STEPS = 10
+        self.TRAINING_BATCH_SIZE = 16
         self.TESTING_BATCH_SIZE = 1
 
 
@@ -85,6 +86,8 @@ class Data():
     def build_transforms(self):
         self.training_transforms = Compose([
             ToTensor(),
+            RandomHorizontalFlip(p=0.5),
+            RandomVerticalFlip(p=0.5),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             Resize((224, 224))
         ])
@@ -98,19 +101,24 @@ class Data():
         dataframe = pd.read_csv(
             "../input/petfinder-pawpularity-score/train.csv")
 
-        train_df, val_df = train_test_split(
-            dataframe, test_size=0.2, random_state=self.cfg.SEED)
-        train_df = train_df.reset_index(drop=True)
-        val_df = val_df.reset_index(drop=True)
+        self.training_data = Paw(dataframe, transform=self.training_transforms)
+        self.testing_data = Paw(dataframe, transform=self.testing_transforms)
 
-        self.training_data = Paw(train_df, transform=self.training_transforms)
-        self.testing_data = Paw(val_df, transform=self.testing_transforms)
+        # train_df, val_df = train_test_split(
+        #     dataframe, test_size=0.2, random_state=self.cfg.SEED)
+        # train_df = train_df.reset_index(drop=True)
+        # val_df = val_df.reset_index(drop=True)
+
+        # self.training_data = Paw(train_df, transform=self.training_transforms)
+        # self.testing_data = Paw(val_df, transform=self.testing_transforms)
 
     def build_dataloader(self):
-        self.training_dataloader = DataLoader(
-            self.training_data, batch_size=self.cfg.TRAINING_BATCH_SIZE, shuffle=True)
-        self.testing_dataloader = DataLoader(
-            self.testing_data, batch_size=self.cfg.TESTING_BATCH_SIZE, shuffle=False)
+        self.training_dataloader = None
+        self.testing_dataloader = None
+        # self.training_dataloader = DataLoader(
+        #     self.training_data, batch_size=self.cfg.TRAINING_BATCH_SIZE, shuffle=True)
+        # self.testing_dataloader = DataLoader(
+        #     self.testing_data, batch_size=self.cfg.TESTING_BATCH_SIZE, shuffle=False)
 
 
 class PawNet(nn.Module):
@@ -155,7 +163,7 @@ def train(epoch, cfg, data, trainer):
 
     loss_training = []
 
-    with tqdm(total=len(data.training_dataloader), desc=f'Training Epoch {epoch}/{cfg.EPOCHS}', unit='BATCH') as pbar_training:
+    with tqdm(total=len(data.training_dataloader), desc=f'Training Epoch {epoch+1}/{cfg.EPOCHS}', unit='BATCH') as pbar_training:
         for batch, (image, features, label) in enumerate(data.training_dataloader):
             image, features, label = image.to(cfg.DEVICE), features.to(
                 cfg.DEVICE), label.to(cfg.DEVICE)
@@ -179,7 +187,7 @@ def validate(epoch, cfg, data, trainer):
 
     loss_validation = []
 
-    with tqdm(total=len(data.testing_dataloader), desc=f'Validation Epoch {epoch}/{cfg.EPOCHS}', unit='BATCH') as pbar_testing:
+    with tqdm(total=len(data.testing_dataloader), desc=f'Validation Epoch {epoch+1}/{cfg.EPOCHS}', unit='BATCH') as pbar_testing:
         for batch, (image, features, label) in enumerate(data.testing_dataloader):
             image, features, label = image.to(cfg.DEVICE), features.to(
                 cfg.DEVICE), label.to(cfg.DEVICE)
@@ -195,42 +203,67 @@ def validate(epoch, cfg, data, trainer):
 
 
 def main(cfg):
+    kfold = KFold(n_splits=cfg.KFOLD, shuffle=True)
+
     data = Data(cfg)
     data.build_transforms()
     data.build_data()
     data.build_dataloader()
 
-    trainer = Trainer(cfg)
-    trainer.build_model()
-    trainer.build_tools()
+    val_loss_kfold = []
 
-    epochs = []
-    trn_loss_epochs = []
-    val_loss_epochs = []
+    for fold, (train_ids, val_ids) in enumerate(kfold.split(data.training_data)):
 
-    for epoch in range(cfg.EPOCHS):
-        training_results = train(epoch, cfg, data, trainer)
-        validtion_results = validate(epoch, cfg, data, trainer)
+        print("Fold {}:".format(fold + 1))
 
-        trainer.scheduler.step()
+        train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
+        val_subsampler = torch.utils.data.SubsetRandomSampler(val_ids)
 
-        print("Training loss: ", training_results["loss"])
-        print("Validation loss: ", validtion_results["loss"])
-        epochs.append(epoch)
-        trn_loss_epochs.append(training_results["loss"])
-        val_loss_epochs.append(validtion_results["loss"])
+        data.training_dataloader = DataLoader(
+            data.training_data, batch_size=cfg.TRAINING_BATCH_SIZE, sampler=train_subsampler)
+        data.testing_dataloader = DataLoader(
+            data.testing_data, batch_size=cfg.TESTING_BATCH_SIZE, sampler=val_subsampler)
 
-    fig_loss = plt.figure(figsize=(10, 10))
-    ax_loss = fig_loss.add_subplot(1, 1, 1)
-    ax_loss.plot(epochs, trn_loss_epochs,
-                 label="Training Loss", color='tab:blue')
-    ax_loss.plot(epochs, val_loss_epochs,
-                 label="Validation Loss", color='tab:orange')
-    ax_loss.set_title('loss')
-    ax_loss.set_xlabel('epochs')
-    ax_loss.set_ylabel('loss')
-    ax_loss.legend()
-    plt.show()
+        trainer = Trainer(cfg)
+        trainer.build_model()
+        trainer.build_tools()
+
+        epochs = []
+        trn_loss_epochs = []
+        val_loss_epochs = []
+
+        for epoch in range(cfg.EPOCHS):
+            training_results = train(epoch, cfg, data, trainer)
+            validtion_results = validate(epoch, cfg, data, trainer)
+
+            trainer.scheduler.step()
+
+            print("Training loss: {}".format(training_results["loss"]))
+            print("Validation loss: {}".format(validtion_results["loss"]))
+            epochs.append(epoch)
+            trn_loss_epochs.append(training_results["loss"])
+            val_loss_epochs.append(validtion_results["loss"])
+
+        val_loss_kfold.append(np.mean(val_loss_epochs))
+        print("Best validation loss: {}".format(min(val_loss_epochs)))
+        print("Average validation loss: {}".format(np.mean(val_loss_epochs)))
+        print("---------------------------------------------------------------")
+
+        # fig_loss = plt.figure(figsize=(10, 10))
+        # ax_loss = fig_loss.add_subplot(1, 1, 1)
+        # ax_loss.plot(epochs, trn_loss_epochs,
+        #              label="Training Loss", color='tab:blue')
+        # ax_loss.plot(epochs, val_loss_epochs,
+        #              label="Validation Loss", color='tab:orange')
+        # ax_loss.set_title('loss')
+        # ax_loss.set_xlabel('epochs')
+        # ax_loss.set_ylabel('loss')
+        # ax_loss.legend()
+        # plt.show()
+
+    print("Average validation loss for all folds: {}".format(
+        np.mean(val_loss_kfold)))
+    print("Finished !\n")
 
 
 if __name__ == '__main__':
