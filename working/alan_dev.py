@@ -20,12 +20,12 @@ class args():
         self.DEVICE = "cuda"
         self.EPOCHS = 20
         self.GAMMA = 0.1
-        self.KFOLD = 3
-        self.LEARNING_RATE = 1e-4
+        self.KFOLD = 5
+        self.LEARNING_RATE = 1e-5
         self.SEED = 42
         self.STEPS = 10
         self.TRAINING_BATCH_SIZE = 16
-        self.TESTING_BATCH_SIZE = 1
+        self.TESTING_BATCH_SIZE = 16
 
 
 def build_environment(cfg):
@@ -177,7 +177,8 @@ def train(epoch, cfg, data, trainer):
             trainer.optimizer.step()
 
             pbar_training.update(1)
-            pbar_training.set_postfix(**{'loss': loss.item()})
+            pbar_training.set_postfix(
+                **{'loss': loss.item(), 'loss avg': np.mean(loss_training)})
 
     return {"loss": np.mean(loss_training)}
 
@@ -197,7 +198,8 @@ def validate(epoch, cfg, data, trainer):
             loss_validation.append(loss.item())
 
             pbar_testing.update(1)
-            pbar_testing.set_postfix(**{'loss': loss.item()})
+            pbar_testing.set_postfix(
+                **{'loss': loss.item(), 'loss avg': np.mean(loss_validation)})
 
     return {"loss": np.mean(loss_validation)}
 
