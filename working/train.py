@@ -45,10 +45,10 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 
 config = {'exp_name':'exp_20230521-2',
-          'commit': "swin_large_patch4_window7_224_in22k(f10_e50_bs32)",
+          'commit': "swin_large_patch4_window7_224_in22k(f1_e50_bs32)",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
-          'n_splits': 10,
+          'n_splits': 1,
           'n_epochs': 50,
           'early_stop': 10,
           'image_size': 224,
@@ -62,7 +62,7 @@ config = {'exp_name':'exp_20230521-2',
               'output_dim': 1,
               'pretrain': True,
           },
-          'save_dir': 'swin_large_patch4_window7_224_in22k(f10_e50_bs32)',  # 儲存權重與log的資料夾
+          'save_dir': 'swin_large_patch4_window7_224_in22k(f1_e50_bs32)',  # 儲存權重與log的資料夾
           'train_loader': {
               'batch_size': 32,
               'shuffle': True,
