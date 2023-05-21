@@ -77,7 +77,7 @@ config = {'exp_name':'exp_20230521-3',
               'pin_memory': True,
               'drop_last': False
           },
-          'loss': 'RMSE',
+          'loss': 'BCEWithLogitsLoss',
 }
 
 config = Box(config)
