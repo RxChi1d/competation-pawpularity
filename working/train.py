@@ -44,25 +44,25 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # In[ ]:
 
 
-config = {'exp_name':'exp_007',
-          'commit': "swin_large_patch4_window12_384改RMSE Loss，5 fold",
+config = {'exp_name':'exp_20230521-1',
+          'commit': "swin_large_patch4_window7_224(f10_e50_bs16)",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
-          'n_splits': 5,
+          'n_splits': 10,
           'n_epochs': 50,
           'early_stop': 10,
-          'image_size': 384,
+          'image_size': 224,
           'lr': 1e-4,  # 如果有使用lr_find這個值會自動更改
-          'lr_find': {'max_lr': 1e-2,
-                      'min_lr': 1e-8,
+          'lr_find': {'max_lr': 1e-4,
+                      'min_lr': 1e-6,
                       'num_training': 100},
           'model':{
               'package': 'timm',  # timm or torchvision
-              'name': 'swin_large_patch4_window12_384',
+              'name': 'swin_large_patch4_window7_224',
               'output_dim': 1,
               'pretrain': True,
           },
-          'save_dir': 'swin_large_patch4_window12_384',  # 儲存權重與log的資料夾
+          'save_dir': 'swin_large_patch4_window7_224(f10_e50_bs16)',  # 儲存權重與log的資料夾
           'train_loader': {
               'batch_size': 16,
               'shuffle': True,
