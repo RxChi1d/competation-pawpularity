@@ -45,39 +45,39 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 
 config = {'exp_name':'exp_20230521-3',
-          'commit': "resnet101(f5_e50_bs32)",
+          'commit': "swin_large_patch4_window12_384_in22k",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
-          'n_splits': 5,
-          'n_epochs': 50,
-          'early_stop': 10,
-          'image_size': 224,
+          'n_splits': 3,
+          'n_epochs': 5,
+          'early_stop': 3,
+          'image_size': 384,
           'lr': 1e-4,  # 如果有使用lr_find這個值會自動更改
           'lr_find': {'max_lr': 1e-4,
                       'min_lr': 1e-6,
                       'num_training': 100},
           'model':{
               'package': 'timm',  # timm or torchvision
-              'name': 'resnet101',
+              'name': 'swin_large_patch4_window12_384_in22k',
               'output_dim': 1,
               'pretrain': True,
           },
-          'save_dir': 'resnet101(f5_e50_bs32)',  # 儲存權重與log的資料夾
+          'save_dir': 'swin_large_patch4_window12_384_in22k',  # 儲存權重與log的資料夾
           'train_loader': {
-              'batch_size': 32,
+              'batch_size': 8,
               'shuffle': True,
               'num_workers': os.cpu_count(),
               'pin_memory': True,
               'drop_last': False
           },
           'val_loader': {
-              'batch_size': 32,
+              'batch_size': 8,
               'shuffle': False,
               'num_workers': os.cpu_count(),
               'pin_memory': True,
               'drop_last': False
           },
-          'loss': 'BCEWithLogitsLoss',
+          'loss': 'RMSE',
 }
 
 config = Box(config)
