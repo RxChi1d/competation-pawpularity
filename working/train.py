@@ -48,7 +48,7 @@ config = {'exp_name':'exp_20230521-4',
           'commit': "swin_large_patch4_window12_384_in22k",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
-          'n_splits': 3,
+          'n_splits': 2,
           'n_epochs': 5,
           'early_stop': 3,
           'image_size': 384,
