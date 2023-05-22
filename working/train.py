@@ -50,7 +50,7 @@ config = {'exp_name':'exp_20230521-4',
           'seed': 2023,
           'n_splits': 2,
           'n_epochs': 5,
-          'early_stop': 3,
+          'early_stop': 4,
           'image_size': 384,
           'lr': 1e-4,  # 如果有使用lr_find這個值會自動更改
           'lr_find': {'max_lr': 1e-4,
