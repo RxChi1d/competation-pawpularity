@@ -45,7 +45,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 
 config = {'exp_name':'exp_20230521-4',
-          'commit': "swin_large_patch4_window12_384_in22k",
+          'commit': "resnet152",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
           'n_splits': 2,
@@ -58,20 +58,20 @@ config = {'exp_name':'exp_20230521-4',
                       'num_training': 100},
           'model':{
               'package': 'timm',  # timm or torchvision
-              'name': 'swin_large_patch4_window12_384_in22k',
+              'name': 'resnet152',
               'output_dim': 1,
               'pretrain': True,
           },
-          'save_dir': 'swin_large_patch4_window12_384_in22k',  # 儲存權重與log的資料夾
+          'save_dir': 'resnet152',  # 儲存權重與log的資料夾
           'train_loader': {
-              'batch_size': 8,
+              'batch_size': 4,
               'shuffle': True,
               'num_workers': os.cpu_count(),
               'pin_memory': True,
               'drop_last': False
           },
           'val_loader': {
-              'batch_size': 8,
+              'batch_size': 4,
               'shuffle': False,
               'num_workers': os.cpu_count(),
               'pin_memory': True,
