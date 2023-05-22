@@ -44,7 +44,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # In[ ]:
 
 
-config = {'exp_name':'exp_20230521-3',
+config = {'exp_name':'exp_20230521-4',
           'commit': "swin_large_patch4_window12_384_in22k",
           'root': '../input/petfinder-pawpularity-score/',  # Data root
           'seed': 2023,
